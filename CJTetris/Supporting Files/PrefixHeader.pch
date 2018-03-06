@@ -1,0 +1,76 @@
+//
+//  PrefixHeader.pch
+//  CJTetris
+//
+//  Created by CoderChenJun on 2018/3/6.
+//  Copyright © 2018年 CoderDream. All rights reserved.
+//
+
+#ifndef PrefixHeader_pch
+#define PrefixHeader_pch
+
+// Include any system framework and library headers here that should be included in all compilation units.
+// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
+
+
+
+
+// 1.RGB颜色
+#define CJColor(r, g, b) [UIColor colorWithRed:(r)/255.0 green:(g)/255.0 blue:(b)/255.0 alpha:1.0]
+#define CJColorWithalpha(r, g, b, a) [UIColor colorWithRed:(r)/255.0 green:(g)/255.0 blue:(b)/255.0 alpha:(a)/1.0]
+#define CJHexColor(rgbValue) [UIColor colorWithRed:((float)((rgbValue & 0xFF0000) >> 16)) / 255.0 green:((float)((rgbValue & 0xFF00) >> 8)) / 255.0 blue:((float)(rgbValue & 0xFF)) / 255.0 alpha:1.0]
+
+
+// 2.自定义Log(DEBUG模式下)
+#ifdef DEBUG
+#define CJLog(...) NSLog(__VA_ARGS__)
+#else
+#define CJLog(...)
+#endif
+
+
+// 3.iOS版本判断
+#define iOS11 ([[UIDevice currentDevice].systemVersion integerValue] >= 11 ? YES : NO)
+#define iOS10 ([[UIDevice currentDevice].systemVersion integerValue] >= 10 ? YES : NO)
+#define iOS9  ([[UIDevice currentDevice].systemVersion integerValue] >= 9  ? YES : NO)
+#define iOS8  ([[UIDevice currentDevice].systemVersion integerValue] >= 8  ? YES : NO)
+
+
+// 4.判断屏幕尺寸
+#define IS_IPHONE_4S    (([[UIScreen mainScreen] bounds].size.height == 480) ? YES : NO)
+#define IS_IPHONE_5     (([[UIScreen mainScreen] bounds].size.height == 568) ? YES : NO)
+#define IS_IPHONE_6     (([[UIScreen mainScreen] bounds].size.height == 667) ? YES : NO)
+#define IS_IPHONE_6plus (([[UIScreen mainScreen] bounds].size.height == 736) ? YES : NO)
+#define IS_IPHONE_X     (([[UIScreen mainScreen] bounds].size.height == 812) ? YES : NO)
+#define IS_IPad         (([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) ? YES :NO)
+
+
+// 5.一些固定的参数
+#define UISCREEN_WIDTH   [UIScreen mainScreen].bounds.size.width
+#define UISCREEN_HEIGHT  [UIScreen mainScreen].bounds.size.height
+
+#define HEIGHT_STATUSBAR          ((IS_IPHONE_X) ? 44 : 20)
+#define HEIGHT_NAVBAR             ((IS_IPHONE_X) ? 44 : 44)
+#define HEIGHT_TABBAR             ((IS_IPHONE_X) ? 83 : 49)
+#define HEIGHT_TABBAR_SECURITY    ((IS_IPHONE_X) ? 34 : 0) // iPhone X底部安全区域,34
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#import "UIView+CJ.h"
+
+
+
+#endif /* PrefixHeader_pch */

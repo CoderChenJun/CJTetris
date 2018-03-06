@@ -1,5 +1,5 @@
 //
-//  ViewController.h
+//  RootViewController.h
 //  CJTetris
 //
 //  Created by CoderChenJun on 2018/3/6.
@@ -8,8 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface ViewController : UIViewController
+@interface RootViewController : UIViewController
 
++ (instancetype)sharedRootViewController;
 
 @end
-
