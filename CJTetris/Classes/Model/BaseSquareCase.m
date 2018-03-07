@@ -122,7 +122,6 @@
 //1.1设置按钮状态
 -(void)setButtonState:(BOOL)states
 {
-    
     //1.1.1根据所传参数设置按钮状态,分别设置四个方块按钮是否显示
     [self setButtonTag:case1.x + case1.y * 10 + 100 states:states];
     [self setButtonTag:case2.x + case2.y * 10 + 100 states:states];
@@ -172,6 +171,11 @@
 {
     RootViewController * rvc = [RootViewController sharedRootViewController];
     
+#pragma mark - 保证方块从最顶部开始出现
+    if (y < 0) {
+        return YES;
+    }
+    
     //以tag获得view并添加button,可以把*10+100看做是标签,根据坐标值x和y来获取button
     UIButton * button = (UIButton *)[rvc.view viewWithTag:x + y * 10 + 100];
     
@@ -179,7 +183,6 @@
     if (button) {
         return button.hidden;
     } else {
-        
         //如果 YES,最底下一行消失
         return NO;
     }
@@ -198,6 +201,16 @@
 {
     
 }
+
+// 开始出现时的随机横向位置
+- (void)randomPosition:(NSInteger)positionX
+{
+    NSLog(@"随机位置 %d", positionX);
+    for (NSInteger i = 0; i < positionX; i++) {
+        [self squareMoveRight];
+    }
+}
+
 
 @end
 

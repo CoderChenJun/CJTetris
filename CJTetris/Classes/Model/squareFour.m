@@ -1,14 +1,22 @@
 //
 //  squareFour.m
-//  yyTetris
+//  CJTetris
 //
-//  Created by 袁扬 on 16/6/8.
+//  Created by CoderChenJun on 2018/3/6.
 //  Copyright © 2016年 袁扬. All rights reserved.
 //
 
 #import "squareFour.h"
 
 @implementation squareFour
+
+- (void)promptToGame
+{
+    case1.y -= 4;
+    case2.y -= 4;
+    case3.y -= 4;
+    case4.y -= 4;
+}
 
 - (instancetype)init
 {
@@ -31,9 +39,9 @@
 {
     if (self.state == 1) {
         [self setButtonState:YES];
-        if ([self beyondBoundsX:case1.x-1 Y:case1.y+1]
-         || [self beyondBoundsX:case3.x+1 Y:case3.y-1]
-         || [self beyondBoundsX:case4.x+2 Y:case4.y-2]) {
+        if ([self beyondBoundsX:case1.x-1 Y:case1.y+1] ||
+            [self beyondBoundsX:case3.x+1 Y:case3.y-1] ||
+            [self beyondBoundsX:case4.x+2 Y:case4.y-2]) {
             [self setButtonState:NO];
             return;
         }

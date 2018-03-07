@@ -14,15 +14,18 @@
 #import "squareFour.h"
 #import "squareFive.h"
 #import "squareSix.h"
+#import "squareSeven.h"
 
 // 一个方块的宽度
 #define OneBlockWidth (20)
+#define gameViewBackgroundColor   ([UIColor groupTableViewBackgroundColor])
+#define promptViewBackgroundColor ([UIColor groupTableViewBackgroundColor])
 
 static RootViewController * instance;
 
 
 
-@interface RootViewController()
+@interface RootViewController()<BaseSquareCaseDelegate>
 
 
 
@@ -146,7 +149,7 @@ static RootViewController * instance;
     self.scoreLabel = [[UILabel alloc] initWithFrame:CGRectMake(30, 10 + HEIGHT_STATUSBAR, labelWidth, 40)];
     self.scoreLabel.text = [NSString stringWithFormat:@"得分:%lu",(unsigned long)self.score];
     self.levelLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.scoreLabel.right + 30, 10 + HEIGHT_STATUSBAR, labelWidth, 40)];
-    self.levelLabel.text = [NSString stringWithFormat:@"等级:%lu",(self.score/200)];
+    self.levelLabel.text = [NSString stringWithFormat:@"等级:%u",(self.score/200)];
     [self.rootView addSubview:self.scoreLabel];
     [self.rootView addSubview:self.levelLabel];
     
@@ -160,7 +163,7 @@ static RootViewController * instance;
     CGFloat gameViewY = 80 + HEIGHT_STATUSBAR;
     self.gameView = [[UIView alloc] initWithFrame:CGRectMake(gameViewX, gameViewY, gameViewW, gameViewH)];//上下左右与边框相隔5,一个按钮单位为1,具体长度为20
     [self.rootView addSubview:self.gameView];
-    self.gameView.backgroundColor = CJColorWithalpha(0, 255, 231, 1);
+    self.gameView.backgroundColor = gameViewBackgroundColor;
     self.gameView.layer.borderColor = [[UIColor blackColor] CGColor];
     self.gameView.layer.borderWidth = 2.0;
     
@@ -172,7 +175,7 @@ static RootViewController * instance;
     CGFloat promptViewY = 80 + HEIGHT_STATUSBAR;
     self.promptView = [[UIView alloc] initWithFrame:CGRectMake(promptViewX, promptViewY, promptViewW, promptViewH)];
     [self.rootView addSubview:self.promptView];
-    self.promptView.backgroundColor = CJColorWithalpha(0, 255, 231, 1);
+    self.promptView.backgroundColor = promptViewBackgroundColor;
     self.promptView.layer.borderColor = [[UIColor blackColor] CGColor];
     self.promptView.layer.borderWidth = 2.0;
     
@@ -322,15 +325,20 @@ static RootViewController * instance;
     //3.1.2创建随机按钮组合
     [self createCase];
     //把提示区的按钮赋值给游戏区
-    self.gameSqureCase = self.promptSqureCase;
+    [self promptSqureCaseToGameSqureCase];
+#warning - 方块横向随机位置出现
+    [self.gameSqureCase randomPosition:[CJToolkit randomIntegerBetween:0 andLargerInteger:8]];
+    
+    
+    
+    
+    
     // 重新随机出,此时不用再隐藏开始按钮
     [self createCase];
     
     
     self.rootView.hidden = NO;
     self.beginButton.hidden  = YES;
-    
-    
     
     
     // 启动定时器
@@ -354,68 +362,71 @@ static RootViewController * instance;
     }
     
     //除以6的余数,rand()是整形
-    switch (rand()%6) {
-        case 0:
+    switch (rand()%7) {
+        case 0:// 红
             self.promptSqureCase = [[squareOne alloc] init];
             for (UIButton *btn in self.promptButtonArray) {
-                btn.backgroundColor = [UIColor redColor];
+                btn.backgroundColor = CJColor(255, 0, 0);
             }
-            
             self.gameSqureCase.caseColor = self.randomColor;
-            self.randomColor = [UIColor redColor];
-            
-            
+            self.randomColor = CJColor(255, 0, 0);
             break;
-        case 1:
+            
+        case 1:// 橙
             self.promptSqureCase = [[squareTwo alloc] init];
             for (UIButton *btn in self.promptButtonArray) {
-                btn.backgroundColor = [UIColor orangeColor];
+                btn.backgroundColor = CJColor(255, 125, 0);
             }
-            
             self.gameSqureCase.caseColor = self.randomColor;
-            self.randomColor = [UIColor orangeColor];
-            
+            self.randomColor = CJColor(255, 125, 0);
             break;
-        case 2:
+            
+        case 2:// 黄
             self.promptSqureCase = [[squareThree alloc] init];
             for (UIButton *btn in self.promptButtonArray) {
-                btn.backgroundColor = [UIColor yellowColor];
+                btn.backgroundColor = CJColor(255, 255, 0);
             }
-            
             self.gameSqureCase.caseColor = self.randomColor;
-            self.randomColor = [UIColor yellowColor];
-            
+            self.randomColor = CJColor(255, 255, 0);
             break;
-        case 3:
+            
+        case 3:// 绿
             self.promptSqureCase = [[squareFour alloc] init];
             for (UIButton *btn in self.promptButtonArray) {
-                btn.backgroundColor = [UIColor greenColor];
+                btn.backgroundColor = CJColor(0, 255, 0);
             }
-            
             self.gameSqureCase.caseColor = self.randomColor;
-            self.randomColor = [UIColor greenColor];
-            
+            self.randomColor = CJColor(0, 255, 0);
             break;
-        case 4:
+            
+        case 4:// 蓝
             self.promptSqureCase = [[squareFive alloc] init];
             for (UIButton *btn in self.promptButtonArray) {
-                btn.backgroundColor = [UIColor blueColor];
+                btn.backgroundColor = CJColor(0, 0, 255);
             }
-            
             self.gameSqureCase.caseColor = self.randomColor;
-            self.randomColor = [UIColor blueColor];
-            
+            self.randomColor = CJColor(0, 0, 255);
             break;
-        case 5:
+            
+        case 5:// 靛
             self.promptSqureCase = [[squareSix alloc] init];
             for (UIButton *btn in self.promptButtonArray) {
-                btn.backgroundColor = [UIColor purpleColor];
+                btn.backgroundColor = CJColor(0, 255, 255);
             }
-            
             self.gameSqureCase.caseColor = self.randomColor;
-            self.randomColor = [UIColor purpleColor];
-            
+            self.randomColor = CJColor(0, 255, 255);
             break;
+            
+        case 6:// 紫
+            self.promptSqureCase = [[squareSeven alloc] init];
+            for (UIButton *btn in self.promptButtonArray) {
+                btn.backgroundColor = CJColor(255, 0, 255);
+            }
+            self.gameSqureCase.caseColor = self.randomColor;
+            self.randomColor = CJColor(255, 0, 255);
+            break;
+            
+            
         default:
             break;
     }
@@ -429,7 +440,6 @@ static RootViewController * instance;
 //3.1.2.1得到当前时间
 -(NSUInteger)getCurrentTime
 {
-    
     //设置时间数据
     NSDate * startDate = [[NSDate alloc] init];
     
@@ -502,15 +512,18 @@ static RootViewController * instance;
     //5.1消除一行满了的按钮
     [self deleteButton];
     
-    //新赋值
-    self.gameSqureCase = self.promptSqureCase;
-    
     //5.2判断按钮状态
     if ([self checkGameState]) {
         self.beginButton.hidden  = NO;
         [self removeTetrisTimer];
         return;
     }
+    
+    //新赋值 //把提示区的按钮赋值给游戏区
+    [self promptSqureCaseToGameSqureCase];
+#warning - 方块横向随机位置出现
+    [self.gameSqureCase randomPosition:[CJToolkit randomIntegerBetween:0 andLargerInteger:8]];
+    
     
     //新按钮
     [self createCase];
@@ -549,7 +562,12 @@ static RootViewController * instance;
     }
 }
 
-//5.1.1以布尔值显示按钮状态：隐藏or显示
+
+/**
+ * 5.1.1以布尔值显示按钮状态：判断 x y 这一格按钮显示状态
+ *
+ * @return YES：按钮存在并且显示；NO：按钮不存在或隐藏
+ */
 -(BOOL)getButtonShowStateX:(NSInteger)x Y:(NSInteger)y
 {
     UIButton * button = (UIButton *)[self.gameView viewWithTag:x + y*10 + 100];
@@ -599,18 +617,31 @@ static RootViewController * instance;
     
 }
 
-//5.2判断按钮状态
--(BOOL)checkGameState
+/**
+ * 5.2 检查游戏状态
+ *
+ * @return YES：结束；NO：未结束
+ */
+- (BOOL)checkGameState
 {
+//    //5.2.1根据所传参数判断是否越界
+//    if ([self.gameSqureCase beyondBoundsX:self.gameSqureCase.case1.x Y:self.gameSqureCase.case1.y] ||
+//        [self.gameSqureCase beyondBoundsX:self.gameSqureCase.case2.x Y:self.gameSqureCase.case2.y] ||
+//        [self.gameSqureCase beyondBoundsX:self.gameSqureCase.case3.x Y:self.gameSqureCase.case3.y] ||
+//        [self.gameSqureCase beyondBoundsX:self.gameSqureCase.case4.x Y:self.gameSqureCase.case4.y]) {
+//        return YES;
+//    }
+//    return NO;
     
-    //5.2.1根据所传参数判断是否越界
-    if ([self.gameSqureCase beyondBoundsX:self.gameSqureCase.case1.x Y:self.gameSqureCase.case1.y]
-        || [self.gameSqureCase beyondBoundsX:self.gameSqureCase.case2.x Y:self.gameSqureCase.case2.y]
-        || [self.gameSqureCase beyondBoundsX:self.gameSqureCase.case3.x Y:self.gameSqureCase.case3.y]
-        || [self.gameSqureCase beyondBoundsX:self.gameSqureCase.case4.x Y:self.gameSqureCase.case4.y]) {
-        return YES;
+    
+    
+    for (int x = 0; x < 10; x++) {
+        if ([self getButtonShowStateX:x Y:0]) {
+            return YES;
+        }
     }
     return NO;
+
     
 }
 #pragma mark ========================================= 方块落下方法 =========================================
@@ -653,8 +684,12 @@ static RootViewController * instance;
 
 
 
-
-
+// 从提示区->游戏区，第一步默认上移几格
+- (void)promptSqureCaseToGameSqureCase
+{
+    self.gameSqureCase = self.promptSqureCase;
+    [self.gameSqureCase promptToGame];
+}
 
 
 

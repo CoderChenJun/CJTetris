@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8F52FBBB204FCD4A00D850B9 /* CJToolkit.m in Sources */ = {isa = PBXBuildFile; fileRef = 8F52FBBA204FCD4A00D850B9 /* CJToolkit.m */; };
+		8F52FBBE204FDF1E00D850B9 /* squareSeven.m in Sources */ = {isa = PBXBuildFile; fileRef = 8F52FBBD204FDF1E00D850B9 /* squareSeven.m */; };
 		8FDB2624204E7306005D0B96 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 8FDB2619204E7306005D0B96 /* AppDelegate.m */; };
 		8FDB2625204E7306005D0B96 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8FDB261C204E7306005D0B96 /* Assets.xcassets */; };
 		8FDB2626204E7306005D0B96 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8FDB261D204E7306005D0B96 /* LaunchScreen.storyboard */; };
@@ -25,6 +27,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8F52FBB9204FCD4A00D850B9 /* CJToolkit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CJToolkit.h; sourceTree = "<group>"; };
+		8F52FBBA204FCD4A00D850B9 /* CJToolkit.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CJToolkit.m; sourceTree = "<group>"; };
+		8F52FBBC204FDF1E00D850B9 /* squareSeven.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = squareSeven.h; sourceTree = "<group>"; };
+		8F52FBBD204FDF1E00D850B9 /* squareSeven.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = squareSeven.m; sourceTree = "<group>"; };
 		8FDB25F7204E7269005D0B96 /* CJTetris.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CJTetris.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8FDB2612204E7306005D0B96 /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		8FDB2619204E7306005D0B96 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -65,6 +71,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8F52FBB8204FCD3D00D850B9 /* Toolkit */ = {
+			isa = PBXGroup;
+			children = (
+				8F52FBB9204FCD4A00D850B9 /* CJToolkit.h */,
+				8F52FBBA204FCD4A00D850B9 /* CJToolkit.m */,
+			);
+			path = Toolkit;
+			sourceTree = "<group>";
+		};
 		8FDB25EE204E7269005D0B96 = {
 			isa = PBXGroup;
 			children = (
@@ -106,6 +121,7 @@
 		8FDB2613204E7306005D0B96 /* Other */ = {
 			isa = PBXGroup;
 			children = (
+				8F52FBB8204FCD3D00D850B9 /* Toolkit */,
 				8FDB2614204E7306005D0B96 /* Category */,
 			);
 			path = Other;
@@ -146,6 +162,8 @@
 				8FDB2638204E7B7C005D0B96 /* squareFive.m */,
 				8FDB2637204E7B7C005D0B96 /* squareSix.h */,
 				8FDB2634204E7B7C005D0B96 /* squareSix.m */,
+				8F52FBBC204FDF1E00D850B9 /* squareSeven.h */,
+				8F52FBBD204FDF1E00D850B9 /* squareSeven.m */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -247,12 +265,14 @@
 				8FDB2624204E7306005D0B96 /* AppDelegate.m in Sources */,
 				8FDB2642204E7B7C005D0B96 /* squareThree.m in Sources */,
 				8FDB2643204E7B7C005D0B96 /* squareOne.m in Sources */,
+				8F52FBBB204FCD4A00D850B9 /* CJToolkit.m in Sources */,
 				8FDB2640204E7B7C005D0B96 /* squareFive.m in Sources */,
 				8FDB2628204E7306005D0B96 /* main.m in Sources */,
 				8FDB2647204E7C76005D0B96 /* UIView+CJ.m in Sources */,
 				8FDB262E204E7A5A005D0B96 /* RootViewController.m in Sources */,
 				8FDB263E204E7B7C005D0B96 /* squareSix.m in Sources */,
 				8FDB263F204E7B7C005D0B96 /* squareTwo.m in Sources */,
+				8F52FBBE204FDF1E00D850B9 /* squareSeven.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -390,6 +410,7 @@
 				DEVELOPMENT_TEAM = UHRKS2NEJU;
 				GCC_PREFIX_HEADER = "$(PROJECT_DIR)/CJTetris/Supporting Files/PrefixHeader.pch";
 				INFOPLIST_FILE = "$(SRCROOT)/CJTetris/Supporting Files/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = BlowForceSquad.CJTetris;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -405,6 +426,7 @@
 				DEVELOPMENT_TEAM = UHRKS2NEJU;
 				GCC_PREFIX_HEADER = "$(PROJECT_DIR)/CJTetris/Supporting Files/PrefixHeader.pch";
 				INFOPLIST_FILE = "$(SRCROOT)/CJTetris/Supporting Files/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = BlowForceSquad.CJTetris;
 				PRODUCT_NAME = "$(TARGET_NAME)";

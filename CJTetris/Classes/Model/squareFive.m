@@ -1,14 +1,22 @@
 //
 //  squareFive.m
-//  yyTetris
+//  CJTetris
 //
-//  Created by 袁扬 on 16/6/8.
+//  Created by CoderChenJun on 2018/3/6.
 //  Copyright © 2016年 袁扬. All rights reserved.
 //
 
 #import "squareFive.h"
 
 @implementation squareFive
+
+- (void)promptToGame
+{
+    case1.y -= 3;
+    case2.y -= 3;
+    case3.y -= 3;
+    case4.y -= 3;
+}
 
 - (instancetype)init
 {
@@ -45,7 +53,7 @@
     } else if (self.state == 2) {
         [self setButtonState:YES];
         if ([self beyondBoundsX:case1.x-1 Y:case1.y-1]
-         || [self beyondBoundsX:case2.x Y:case3.y-1]
+         || [self beyondBoundsX:case2.x   Y:case3.y-1]
          || [self beyondBoundsX:case3.x+1 Y:case3.y]) {
             [self setButtonState:NO];
             return;

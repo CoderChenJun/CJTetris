@@ -1,14 +1,22 @@
 //
 //  squareTwo.m
-//  yyTetris
+//  CJTetris
 //
-//  Created by 袁扬 on 16/6/8.
+//  Created by CoderChenJun on 2018/3/6.
 //  Copyright © 2016年 袁扬. All rights reserved.
 //
 
 #import "squareTwo.h"
 
 @implementation squareTwo
+
+- (void)promptToGame
+{
+    case1.y -= 3;
+    case2.y -= 3;
+    case3.y -= 3;
+    case4.y -= 3;
+}
 
 - (instancetype)init
 {

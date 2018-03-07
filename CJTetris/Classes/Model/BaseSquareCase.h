@@ -74,10 +74,20 @@ typedef struct Square Square;// 第一个是定义的名字（上面），第二
 //根据所传布尔值设置按钮状态
 - (void)setButtonState:(BOOL)state;
 
-//形状变换
+
+/**
+ * 变换 方块 形状
+ */
 - (void)squareRound;
 
 
+
+
+// 开始出现时的随机横向位置
+- (void)randomPosition:(NSInteger)positionX;
+
+// 从提示区->游戏区，第一步默认上移几格
+- (void)promptToGame;
 
 @end
 
