@@ -20,7 +20,7 @@
 // 开始出现时的随机横向位置
 - (void)randomPosition:(NSInteger)positionX
 {
-    NSLog(@"随机位置 %ld", (long)positionX);
+    CJLog(@"随机位置 %ld", (long)positionX);
     for (NSInteger i = 0; i < positionX; i++) {
         [self squareMoveRight];
     }

@@ -55,6 +55,9 @@
 #define HEIGHT_TABBAR_SECURITY    ((IS_IPHONE_X) ? 34 : 0) // iPhone X底部安全区域,34
 
 
+// 字体名称
+#define ThemeFontName     @"HelveticaNeue"
+#define ThemeFontNameBold @"HelveticaNeue-Bold"
 
 
 
@@ -71,9 +74,9 @@
 
 #import "UIView+CJ.h"
 
-
 #import "CJToolkit.h"
 
+#import "FontAweSomeHeader.h"
 
 
 #endif /* PrefixHeader_pch */

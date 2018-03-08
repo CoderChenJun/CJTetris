@@ -23,16 +23,11 @@
 static RootViewController * instance;
 
 
-
 @interface RootViewController()<BaseSquareCaseDelegate>
-@property (nonatomic, strong) UIButton *beginButton;/**< 开始按钮 */
-@property (nonatomic, strong) UIView *rootView;/**< rootVView */
-
-
-
-@property (nonatomic, strong) UILabel *scoreLabel;/**< 得分Label */
-@property (nonatomic, strong) UILabel *levelLabel;/**< 等级Label */
-@property (nonatomic, assign) NSUInteger score;/**< 得分_数值 */
+@property (nonatomic, strong) UIView   *beginView;       /**< beginView */
+@property (nonatomic, strong) UIButton *beginButton;     /**< 开始按钮 */
+@property (nonatomic, strong) UILabel  *resultScoreLabel;/**< 最终得分 */
+@property (nonatomic, strong) UIView *rootView;/**< rootView */
 
 
 
@@ -59,13 +54,25 @@ static RootViewController * instance;
 @property (nonatomic, strong) UIButton *leftButton;
 @property (nonatomic, strong) UIButton *rightButton;
 @property (nonatomic, strong) UIButton *downButton;
-@property (nonatomic, strong) UIButton *topButton;
+@property (nonatomic, strong) UIButton *upButton;
 
 @property (nonatomic, strong) UIButton *rotateButton;
 @property (nonatomic, strong) UIButton *downStraightButton;
 
+@property (nonatomic, strong) UIButton *playPauseButton;
 
-@property (nonatomic, strong) NSTimer *tetrisTimer;
+
+
+
+
+@property (nonatomic, strong) UILabel *scoreLabel;/**< 得分Label */
+@property (nonatomic, strong) UILabel *levelLabel;/**< 等级Label */
+@property (nonatomic, assign) NSUInteger score;/**< 得分_数值 */
+
+
+@property (nonatomic, strong) NSTimer *tetrisTimer;/**< 格子下落 定时器 */
+@property (nonatomic, assign) CGFloat rankTime;    /**< 每次升级 减少时间单位 如:0.05s */
+@property (nonatomic, assign) NSUInteger rankScore;/**< 每次升级 需要多少分 如:500 */
 
 @end
 
@@ -110,7 +117,7 @@ static RootViewController * instance;
 {
     _score = score;
     self.scoreLabel.text = [NSString stringWithFormat:@"得分:%lu",(unsigned long)self.score];
-    self.levelLabel.text = [NSString stringWithFormat:@"等级:%lu",(self.score/200)];
+    self.levelLabel.text = [NSString stringWithFormat:@"等级:%lu",(self.score / self.rankScore)];
 }
 
 
@@ -118,7 +125,10 @@ static RootViewController * instance;
 
 
 
-
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+}
 - (void)loadView
 {
     [super loadView];
@@ -129,7 +139,8 @@ static RootViewController * instance;
     self.promptViewNumX  = 3;
     self.promptViewNumY  = 4;
     self.OneBlockWidth = (UISCREEN_WIDTH - 70) / (2 * self.promptViewNumX + self.gameViewNumX);
-    
+    self.rankTime  = 0.05;
+    self.rankScore = 500;
     
     
     //1创建游戏视图
@@ -162,11 +173,11 @@ static RootViewController * instance;
     // 1.1 rootView
     self.rootView = [[UIView alloc] initWithFrame:self.view.bounds];
     [self.view addSubview:self.rootView];
-    self.rootView.hidden = YES;
     
     CGFloat labelWidth = (self.view.width - 3 * 30) / 2;
     self.scoreLabel = [[UILabel alloc] init];
     [self.rootView addSubview:self.scoreLabel];
+    self.scoreLabel.font   = [UIFont fontWithName:ThemeFontNameBold size:16];
     self.scoreLabel.x      = 30;
     self.scoreLabel.y      = HEIGHT_STATUSBAR + 10;
     self.scoreLabel.width  = labelWidth;
@@ -174,6 +185,7 @@ static RootViewController * instance;
     
     self.levelLabel = [[UILabel alloc] init];
     [self.rootView addSubview:self.levelLabel];
+    self.levelLabel.font   = [UIFont fontWithName:ThemeFontNameBold size:16];
     self.levelLabel.x      = self.scoreLabel.right + 30;
     self.levelLabel.y      = HEIGHT_STATUSBAR + 10;
     self.levelLabel.width  = labelWidth;
@@ -278,27 +290,38 @@ static RootViewController * instance;
 //    self.rightButton.x      = self.downButton.right;
 //    self.rightButton.y      = twoY;
     
+    UIColor *buttonBackgroundColor = CJColorWithalpha(200, 200, 200, 1.0);
     
+    
+    
+    UIView *transverseView = [[UIView alloc] init];
+    transverseView.backgroundColor = buttonBackgroundColor;
+    [self.rootView addSubview:transverseView];
+    
+    UIView *longitudinalView = [[UIView alloc] init];
+    longitudinalView.backgroundColor = buttonBackgroundColor;
+    [self.rootView addSubview:longitudinalView];
+    
+    
+    CGFloat minBadgeY = MIN(30, (UISCREEN_HEIGHT - HEIGHT_TABBAR_SECURITY - self.gameView.bottom - 3*50) / 2);
     // 左
     self.leftButton = [[UIButton alloc] init];
     [self.rootView addSubview:self.leftButton];
     [self.leftButton addTarget:self action:@selector(leftClick:) forControlEvents:UIControlEventTouchUpInside];
-    [self.leftButton setTitle:@"左" forState:UIControlStateNormal];
-    [self.leftButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    self.leftButton.backgroundColor = CJColor(200, 200, 200);
+    [self.leftButton setImage:[UIImage imageWithIcon:@"fa-arrow-left" backgroundColor:[UIColor clearColor] iconColor:[UIColor blackColor] fontSize:25] forState:UIControlStateNormal];
+    self.leftButton.backgroundColor = buttonBackgroundColor;
     self.leftButton.layer.masksToBounds = YES;
     self.leftButton.layer.cornerRadius  = 10;
     self.leftButton.width  = 50;
     self.leftButton.height = 50;
-    self.leftButton.x      = 10;
-    self.leftButton.y      = UISCREEN_HEIGHT - 2*self.leftButton.height - 10;
+    self.leftButton.x      = 30;
+    self.leftButton.y      = UISCREEN_HEIGHT - 2*self.leftButton.height - minBadgeY - HEIGHT_TABBAR_SECURITY;
     // 右
     self.rightButton = [[UIButton alloc] init];
     [self.rootView addSubview:self.rightButton];
     [self.rightButton addTarget:self action:@selector(rightClick:) forControlEvents:UIControlEventTouchUpInside];
-    [self.rightButton setTitle:@"右" forState:UIControlStateNormal];
-    [self.rightButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    self.rightButton.backgroundColor = CJColor(200, 200, 200);
+    [self.rightButton setImage:[UIImage imageWithIcon:@"fa-arrow-right" backgroundColor:[UIColor clearColor] iconColor:[UIColor blackColor] fontSize:25] forState:UIControlStateNormal];
+    self.rightButton.backgroundColor = buttonBackgroundColor;
     self.rightButton.layer.masksToBounds = YES;
     self.rightButton.layer.cornerRadius  = 10;
     self.rightButton.width  = 50;
@@ -309,9 +332,8 @@ static RootViewController * instance;
     self.downButton = [[UIButton alloc] init];
     [self.rootView addSubview:self.downButton];
     [self.downButton addTarget:self action:@selector(downClick:) forControlEvents:UIControlEventTouchUpInside];
-    [self.downButton setTitle:@"下" forState:UIControlStateNormal];
-    [self.downButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    self.downButton.backgroundColor = CJColor(200, 200, 200);
+    [self.downButton setImage:[UIImage imageWithIcon:@"fa-arrow-down" backgroundColor:[UIColor clearColor] iconColor:[UIColor blackColor] fontSize:25] forState:UIControlStateNormal];
+    self.downButton.backgroundColor = buttonBackgroundColor;
     self.downButton.layer.masksToBounds = YES;
     self.downButton.layer.cornerRadius  = 10;
     self.downButton.width  = 50;
@@ -319,45 +341,66 @@ static RootViewController * instance;
     self.downButton.x      = self.leftButton.right;
     self.downButton.y      = self.leftButton.bottom;
     // 上
-    self.topButton = [[UIButton alloc] init];
-    [self.rootView addSubview:self.topButton];
-    [self.topButton addTarget:self action:@selector(rotateClick:) forControlEvents:UIControlEventTouchUpInside];
-    [self.topButton setTitle:@"上" forState:UIControlStateNormal];
-    [self.topButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    self.topButton.backgroundColor = CJColor(200, 200, 200);
-    self.topButton.layer.masksToBounds = YES;
-    self.topButton.layer.cornerRadius  = 10;
-    self.topButton.width  = 50;
-    self.topButton.height = 50;
-    self.topButton.x      = self.leftButton.right;
-    self.topButton.y      = self.leftButton.y - self.leftButton.height;
+    self.upButton = [[UIButton alloc] init];
+    [self.rootView addSubview:self.upButton];
+    [self.upButton addTarget:self action:@selector(rotateClick:) forControlEvents:UIControlEventTouchUpInside];
+    [self.upButton setImage:[UIImage imageWithIcon:@"fa-arrow-up" backgroundColor:[UIColor clearColor] iconColor:[UIColor blackColor] fontSize:25] forState:UIControlStateNormal];
+    self.upButton.backgroundColor = buttonBackgroundColor;
+    self.upButton.layer.masksToBounds = YES;
+    self.upButton.layer.cornerRadius  = 10;
+    self.upButton.width  = 50;
+    self.upButton.height = 50;
+    self.upButton.x      = self.leftButton.right;
+    self.upButton.y      = self.leftButton.y - self.leftButton.height;
     // 转
     self.rotateButton = [[UIButton alloc] init];
     [self.rootView addSubview:self.rotateButton];
     [self.rotateButton addTarget:self action:@selector(rotateClick:) forControlEvents:UIControlEventTouchUpInside];
-    [self.rotateButton setTitle:@"转" forState:UIControlStateNormal];
-    [self.rotateButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    self.rotateButton.backgroundColor = CJColor(200, 200, 200);
+    [self.rotateButton setImage:[UIImage imageWithIcon:@"fa-repeat" backgroundColor:[UIColor clearColor] iconColor:[UIColor blackColor] fontSize:25] forState:UIControlStateNormal];
+    self.rotateButton.backgroundColor = buttonBackgroundColor;
     self.rotateButton.layer.masksToBounds = YES;
     self.rotateButton.layer.cornerRadius  = 10;
     self.rotateButton.width  = 50;
     self.rotateButton.height = 50;
-    self.rotateButton.x      = UISCREEN_WIDTH - self.leftButton.width - self.leftButton.right;
+    self.rotateButton.x      = UISCREEN_WIDTH - self.leftButton.width - self.leftButton.x;
     self.rotateButton.y      = self.leftButton.y - self.leftButton.height;
     // 降
     self.downStraightButton = [[UIButton alloc] init];
     [self.rootView addSubview:self.downStraightButton];
     [self.downStraightButton addTarget:self action:@selector(downStraightClick:) forControlEvents:UIControlEventTouchUpInside];
-    [self.downStraightButton setTitle:@"降" forState:UIControlStateNormal];
-    [self.downStraightButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    self.downStraightButton.backgroundColor = CJColor(200, 200, 200);
+    [self.downStraightButton setImage:[UIImage imageWithIcon:@"fa-long-arrow-down" backgroundColor:[UIColor clearColor] iconColor:[UIColor blackColor] fontSize:25] forState:UIControlStateNormal];    //fa-long-arrow-down //fa-angle-double-down
+    self.downStraightButton.backgroundColor = buttonBackgroundColor;
     self.downStraightButton.layer.masksToBounds = YES;
     self.downStraightButton.layer.cornerRadius  = 10;
     self.downStraightButton.width  = 50;
     self.downStraightButton.height = 50;
-    self.downStraightButton.x      = UISCREEN_WIDTH - self.leftButton.width - self.leftButton.right;
+    self.downStraightButton.x      = UISCREEN_WIDTH - self.leftButton.width - self.leftButton.x;
     self.downStraightButton.y      = self.leftButton.bottom;
     
+    // 暂停
+    self.playPauseButton = [[UIButton alloc] init];
+    [self.rootView addSubview:self.playPauseButton];
+    [self.playPauseButton addTarget:self action:@selector(playPauseClick:) forControlEvents:UIControlEventTouchUpInside];
+    [self.playPauseButton setImage:[UIImage imageWithIcon:@"fa-pause" backgroundColor:[UIColor clearColor] iconColor:[UIColor blackColor] fontSize:25] forState:UIControlStateNormal];
+    [self.playPauseButton setImage:[UIImage imageWithIcon:@"fa-play" backgroundColor:[UIColor clearColor] iconColor:[UIColor blackColor] fontSize:25] forState:UIControlStateSelected];
+    self.playPauseButton.backgroundColor = buttonBackgroundColor;
+    self.playPauseButton.layer.masksToBounds = YES;
+    self.playPauseButton.layer.cornerRadius  = 10;
+    self.playPauseButton.width  = 50;
+    self.playPauseButton.height = 50;
+    self.playPauseButton.x      = (UISCREEN_WIDTH - self.gameView.right - self.playPauseButton.width) / 2 + self.gameView.right;
+    self.playPauseButton.y      = self.gameView.bottom - self.playPauseButton.height;
+    
+    
+    transverseView.x      = self.leftButton.centerX;
+    transverseView.y      = self.leftButton.y;
+    transverseView.width  = self.rightButton.centerX - self.leftButton.centerX;
+    transverseView.height = self.leftButton.height;
+    
+    longitudinalView.x      = self.upButton.x;
+    longitudinalView.y      = self.upButton.centerY;
+    longitudinalView.width  = self.upButton.width;
+    longitudinalView.height = self.downButton.centerY - self.upButton.centerY;
     
     
 }
@@ -378,12 +421,36 @@ static RootViewController * instance;
 {
     [self.gameSqureCase squareRound];
 }
-- (void)downStraightClick:(UIButton *)downButton
+- (void)downStraightClick:(UIButton *)downStraightButton
 {
     while (self.isNewCase == NO) {
         [self.gameSqureCase squareMoveDown];
     }
 }
+- (void)playPauseClick:(UIButton *)playPausebutton
+{
+    // selected如果是YES，显示"▶️"，代表暂停
+    // selected如果是NO， 显示"⏸"，代表开始
+    playPausebutton.selected = !playPausebutton.isSelected;
+    if (playPausebutton.selected == YES) {// 暂停
+        [self.tetrisTimer setFireDate:[NSDate distantFuture]];
+        [self setOperationButtonUserInteractionEnabled:NO];
+    }
+    else {// 开始
+        [self.tetrisTimer setFireDate:[NSDate date]];
+        [self setOperationButtonUserInteractionEnabled:YES];
+    }
+}
+- (void)setOperationButtonUserInteractionEnabled:(BOOL)userInteractionEnabled
+{
+    self.leftButton.userInteractionEnabled         = userInteractionEnabled;
+    self.rightButton.userInteractionEnabled        = userInteractionEnabled;
+    self.upButton.userInteractionEnabled           = userInteractionEnabled;
+    self.downButton.userInteractionEnabled         = userInteractionEnabled;
+    self.rotateButton.userInteractionEnabled       = userInteractionEnabled;
+    self.downStraightButton.userInteractionEnabled = userInteractionEnabled;
+}
+
 #pragma mark ================================================= 创建 - 游戏视图 =================================================
 #pragma mark ================================================= 创建 - 游戏视图 =================================================
 #pragma mark ================================================= 创建 - 游戏视图 =================================================
@@ -400,6 +467,20 @@ static RootViewController * instance;
  */
 -(void)createSquareButtons
 {
+    CGFloat cornerRadius = 5.0;
+    CGFloat borderWidth  = 1.0;
+    
+    //游戏区背景条纹
+    for (int x = 0; x < self.gameViewNumX; x++) {
+        for (int y = 0; y < self.gameViewNumY; y++) {
+            UIView *view = [[UIView alloc] init];
+            view.frame = CGRectMake(x*self.OneBlockWidth+5, y*self.OneBlockWidth+5, self.OneBlockWidth, self.OneBlockWidth);
+//            view.layer.cornerRadius = cornerRadius;
+            view.layer.borderWidth  = borderWidth;
+            view.layer.borderColor  = [[UIColor lightGrayColor] CGColor];
+            [self.gameView addSubview:view];
+        }
+    }
     //200个游戏区按钮------宽度10*20，高度20*20，内边距为5
     for (int x = 0; x < self.gameViewNumX; x++) {
         for (int y = 0; y < self.gameViewNumY; y++) {
@@ -409,9 +490,9 @@ static RootViewController * instance;
             //100,77分别是游戏视图和手机边框所隔宽度,加上边框线条宽度,以及设置frame
             button.frame = CGRectMake(x*self.OneBlockWidth+5, y*self.OneBlockWidth+5, self.OneBlockWidth, self.OneBlockWidth);
             
-            button.layer.cornerRadius = 4.0;
-            button.layer.borderWidth = 1.0;
-            button.layer.borderColor = [[UIColor blackColor] CGColor];
+            button.layer.cornerRadius = cornerRadius;
+            button.layer.borderWidth  = borderWidth;
+            button.layer.borderColor  = [[UIColor blackColor] CGColor];
             
             //无法点击并且隐藏
             button.enabled = NO;
@@ -431,8 +512,8 @@ static RootViewController * instance;
             
             button.frame = CGRectMake(x*self.OneBlockWidth+5, y*self.OneBlockWidth+5, self.OneBlockWidth, self.OneBlockWidth);
             
-            button.layer.cornerRadius = 4.0;
-            button.layer.borderWidth  = 1.0;
+            button.layer.cornerRadius = cornerRadius;
+            button.layer.borderWidth  = borderWidth;
             button.layer.borderColor  = [[UIColor blackColor] CGColor];
             
             button.enabled = NO;
@@ -466,7 +547,7 @@ static RootViewController * instance;
 #pragma mark ================================================= 方块 - 落下方法 =================================================
 #pragma mark ================================================= 方块 - 落下方法 =================================================
 //4.1.1调用下移方法
--(void)doMainSquareMoveDown
+- (void)doMainSquareMoveDown
 {
     self.isNewCase = NO;
     //4.1.1.1按钮下移
@@ -475,16 +556,15 @@ static RootViewController * instance;
 }
 
 //5.squareMoveDown方法回调
--(void)squareDownToEnd
+- (void)squareDownToEnd
 {
     self.isNewCase = YES;
     
     //5.1消除一行满了的按钮
-    [self deleteButton];
+    [self clearOneLineButtons];
     
     //5.2判断按钮状态，判断游戏结束
     if ([self checkGameState]) {
-        self.beginButton.hidden  = NO;
         [self stopButtonClick];
         return;
     }
@@ -496,7 +576,7 @@ static RootViewController * instance;
 /**
  * 5.1消除一行满了的按钮
  */
--(void)deleteButton
+- (void)clearOneLineButtons
 {
     BOOL flage;
     for (int y = (self.gameViewNumY-1); y >= 0; y--) {
@@ -505,7 +585,7 @@ static RootViewController * instance;
             //5.1.1以布尔值显示按钮状态：隐藏or显示.(0,19)处有按钮时,不满足条件,不进行判断,直接进行自加;一行加完后执行下一个if;如果没有按钮,这一行就不可能满,就不用再判断这一行,break.
             if (![self getButtonShowStateX:x Y:y]) {
                 flage = YES;
-                printf("x: %d, y: %d\n", x, y);
+                //CJLog(@"x: %d, y: %d\n", x, y);
                 break;
             }
         }
@@ -540,7 +620,7 @@ static RootViewController * instance;
 /**
  * 5.1.2根据y值设置按钮显示状态(消除满行时调用方法)
  */
--(void)setButtonShowState:(NSInteger)y
+- (void)setButtonShowState:(NSInteger)y
 {
     for (int i = 0; i < self.gameViewNumX; i++) {
         UIButton * button = (UIButton *)[self.gameView viewWithTag:(y * 100 + i + 10000)];
@@ -551,9 +631,9 @@ static RootViewController * instance;
 }
 
 /**
- * 5.1.3消除一行后的上一行下移
+ * 5.1.3消除一行后的 上一行下移
  */
--(void)resetButtonPoint:(NSInteger)y
+- (void)resetButtonPoint:(NSInteger)y
 {
     //重置标签,有得分后标签显示这个
     self.score += 100;
@@ -605,12 +685,19 @@ static RootViewController * instance;
 //3.开始按钮
 -(void)setupBeginButton
 {
+    self.beginView = [[UIView alloc] init];
+    [self.view addSubview:self.beginView];
+    self.beginView.frame = self.view.bounds;
+    self.beginView.backgroundColor = CJColorWithalpha(220, 220, 220, 0.9);
+    
+    
     self.beginButton = [[UIButton alloc] init];
-    [self.view addSubview:self.beginButton];
+    [self.beginView addSubview:self.beginButton];
     [self.beginButton addTarget:self action:@selector(beginButtonClick) forControlEvents:UIControlEventTouchUpInside];
     [self.beginButton setTitle:@"开始游戏" forState:UIControlStateNormal];
-    [self.beginButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    self.beginButton.backgroundColor = CJColor(200, 200, 200);
+    [self.beginButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    self.beginButton.titleLabel.font = [UIFont fontWithName:ThemeFontNameBold size:18];
+    self.beginButton.backgroundColor = CJColor(50, 50, 50);
     self.beginButton.layer.masksToBounds = YES;
     self.beginButton.layer.cornerRadius  = 10;
     self.beginButton.width  = 200;
@@ -619,12 +706,23 @@ static RootViewController * instance;
     self.beginButton.y      = (self.view.height - self.beginButton.height) / 2;
     
     
+    self.resultScoreLabel = [[UILabel alloc] init];
+    [self.beginView addSubview:self.resultScoreLabel];
+    self.resultScoreLabel.font          = [UIFont fontWithName:ThemeFontNameBold size:18];
+    self.resultScoreLabel.textAlignment = NSTextAlignmentCenter;
+    self.resultScoreLabel.textColor     = [UIColor blackColor];
+    self.resultScoreLabel.text          = @"";
+    self.resultScoreLabel.width  = self.beginView.width;
+    self.resultScoreLabel.height = 50;
+    self.resultScoreLabel.x      = 0;
+    self.resultScoreLabel.y      = self.beginButton.y - self.resultScoreLabel.height;
+    
 }
-
-//3.1点击开始按钮
+/**
+ * Game Start
+ */
 -(void)beginButtonClick
 {
-    self.score = 0;
     
     for (int x = 0; x < self.gameViewNumX; x++) {
         for (int y = 0; y < self.gameViewNumY; y++) {
@@ -642,17 +740,34 @@ static RootViewController * instance;
     //把提示区的按钮赋值给游戏区
     [self promptSqureCaseToGameSqureCase];
     
-    self.rootView.userInteractionEnabled = YES;
-    self.rootView.hidden                 = NO;
-    self.beginButton.hidden  = YES;
-    
+    self.score = 0;
     [self addTetrisTimer];
     
+    
+    
+    
+    
+    self.resultScoreLabel.text          = @"";
+    
+    self.rootView.userInteractionEnabled = YES;
+    self.beginView.hidden                = YES;
+    
+    self.playPauseButton.selected = NO;
+    
+    
 }
+/**
+ * Game Over
+ */
 - (void)stopButtonClick
 {
-    self.rootView.userInteractionEnabled = NO;
     [self removeTetrisTimer];
+    self.resultScoreLabel.text = [NSString stringWithFormat:@"最终得分:%lu",(unsigned long)self.score];
+    
+    self.rootView.userInteractionEnabled = NO;
+    self.beginView.hidden                = NO;
+    
+    self.playPauseButton.selected = YES;
 }
 
 /**
@@ -681,9 +796,6 @@ static RootViewController * instance;
     [self createPromptSqureCase];
     
 }
-
-
-
 
 
 
@@ -822,34 +934,34 @@ static RootViewController * instance;
 #pragma mark ================================================= 定时器 - 操作方法 =================================================
 - (void)addTetrisTimer
 {
-    // 1.创建定时器
-    self.tetrisTimer = [NSTimer timerWithTimeInterval:(1.0 - (self.score/200) * 0.05)
+    NSInteger      level    = self.score / self.rankScore;
+    NSTimeInterval interval = (1.0 - level * self.rankTime);
+    self.tetrisTimer = [NSTimer timerWithTimeInterval:interval
                                                target:self
                                              selector:@selector(timerFunction)
                                              userInfo:nil
                                               repeats:YES];
-    // 2.添加到运行时中,并循环
     NSRunLoop *looper = [NSRunLoop mainRunLoop] ;
     [looper addTimer:self.tetrisTimer forMode:NSRunLoopCommonModes];
     
-    NSLog(@"启动定时器");
+    CJLog(@"启动定时器");
     
 }
 
 - (void)removeTetrisTimer
 {
-    // 1.从运行循环中移除
     [self.tetrisTimer invalidate];
-    // 2.清空定时器
     self.tetrisTimer = nil;
-    NSLog(@"销毁定时器");
+    CJLog(@"销毁定时器");
 }
 
 - (void)timerFunction
 {
-    NSLog(@"进到定时方法");
+    CJLog(@"进到定时方法");
     NSTimeInterval nowInterval = self.tetrisTimer.timeInterval;
-    if (nowInterval == (1.0 - (self.score/200) * 0.05)) {
+    NSInteger      level    = self.score / self.rankScore;
+    NSTimeInterval interval = (1.0 - level * self.rankTime);
+    if (nowInterval == interval) {
         [self doMainSquareMoveDown];
     }
     else {
