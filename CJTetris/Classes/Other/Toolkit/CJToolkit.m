@@ -23,7 +23,7 @@
     NSInteger startVal = num1*10000;
     NSInteger endVal   = num2*10000;
     
-    NSInteger randomValue = startVal +(arc4random()%(endVal - startVal));
+    NSInteger randomValue = startVal + (arc4random()%(endVal - startVal));
     CGFloat a = randomValue;
     
     return(a /10000.0);
@@ -38,10 +38,16 @@
  */
 + (NSInteger)randomIntegerBetween:(NSInteger)num1 andLargerInteger:(NSInteger)num2
 {
+//    获取一个随机整数，范围在[from,to]，包括from，包括to
+//    -(int)getRandomNumber:(int)from to:(int)to
+//    {
+//        return (int)(from + (arc4random() % (to – from + 1)));
+//    }
+    
     NSInteger startVal = num1;
     NSInteger endVal   = num2;
     
-    NSInteger randomValue = startVal +(arc4random()%(endVal - startVal));
+    NSInteger randomValue = startVal + (arc4random()%(endVal - startVal + 1));
     
     return randomValue;
 }
