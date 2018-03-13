@@ -20,10 +20,13 @@
 #define gameViewBackgroundColor   ([UIColor groupTableViewBackgroundColor])
 #define promptViewBackgroundColor ([UIColor groupTableViewBackgroundColor])
 
+static CGFloat speedUpInterval = 0.1f;
+
 static RootViewController * instance;
 
 
-@interface RootViewController()<BaseSquareCaseDelegate>
+@interface RootViewController ()<BaseSquareCaseDelegate, UIGestureRecognizerDelegate>
+
 @property (nonatomic, strong) UIView   *beginView;       /**< beginView */
 @property (nonatomic, strong) UIButton *beginButton;     /**< 开始按钮 */
 @property (nonatomic, strong) UILabel  *resultScoreLabel;/**< 最终得分 */
@@ -61,6 +64,7 @@ static RootViewController * instance;
 
 @property (nonatomic, strong) UIButton *playPauseButton;
 
+@property (nonatomic, strong) NSTimer *buttonLongPressTimer;/**< 按钮长按 定时器 */
 
 
 
@@ -70,9 +74,12 @@ static RootViewController * instance;
 @property (nonatomic, assign) NSUInteger score;/**< 得分_数值 */
 
 
+
 @property (nonatomic, strong) NSTimer *tetrisTimer;/**< 格子下落 定时器 */
 @property (nonatomic, assign) CGFloat rankTime;    /**< 每次升级 减少时间单位 如:0.05s */
 @property (nonatomic, assign) NSUInteger rankScore;/**< 每次升级 需要多少分 如:500 */
+
+
 
 @end
 
@@ -117,7 +124,7 @@ static RootViewController * instance;
 {
     _score = score;
     self.scoreLabel.text = [NSString stringWithFormat:@"得分:%lu",(unsigned long)self.score];
-    self.levelLabel.text = [NSString stringWithFormat:@"等级:%lu",(self.score / self.rankScore)];
+    self.levelLabel.text = [NSString stringWithFormat:@"等级:%u",(self.score / self.rankScore)];
 }
 
 
@@ -233,63 +240,6 @@ static RootViewController * instance;
     
     
     
-    
-//    CGFloat badgeX = 50;
-//    CGFloat badgeY = 30;
-//
-//    self.downButton = [[UIButton alloc] init];
-//    [self.rootView addSubview:self.downButton];
-//    [self.downButton addTarget:self action:@selector(downClick:) forControlEvents:UIControlEventTouchUpInside];
-//    [self.downButton setTitle:@"下" forState:UIControlStateNormal];
-//    [self.downButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-//    self.downButton.backgroundColor = CJColor(200, 200, 200);
-//    self.downButton.layer.masksToBounds = YES;
-//    self.downButton.layer.cornerRadius  = 10;
-//    self.downButton.width  = 50;
-//    self.downButton.height = 50;
-//    self.downButton.x      = (UISCREEN_WIDTH - self.downButton.width) / 2;
-//    self.downButton.y      = UISCREEN_HEIGHT - self.downButton.height - 10;
-//
-//    self.rotateButton = [[UIButton alloc] init];
-//    [self.rootView addSubview:self.rotateButton];
-//    [self.rotateButton addTarget:self action:@selector(rotateClick:) forControlEvents:UIControlEventTouchUpInside];
-//    [self.rotateButton setTitle:@"转" forState:UIControlStateNormal];
-//    [self.rotateButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-//    self.rotateButton.backgroundColor = CJColor(200, 200, 200);
-//    self.rotateButton.layer.masksToBounds = YES;
-//    self.rotateButton.layer.cornerRadius  = 10;
-//    self.rotateButton.width  = 50;
-//    self.rotateButton.height = 50;
-//    self.rotateButton.x      = (UISCREEN_WIDTH - self.rotateButton.width) / 2;
-//    self.rotateButton.y      = self.downButton.y - 2*self.rotateButton.height;
-//
-//    CGFloat twoY = (self.downButton.bottom + self.rotateButton.y) / 2 - 25;
-//    self.leftButton = [[UIButton alloc] init];
-//    [self.rootView addSubview:self.leftButton];
-//    [self.leftButton addTarget:self action:@selector(leftClick:) forControlEvents:UIControlEventTouchUpInside];
-//    [self.leftButton setTitle:@"左" forState:UIControlStateNormal];
-//    [self.leftButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-//    self.leftButton.backgroundColor = CJColor(200, 200, 200);
-//    self.leftButton.layer.masksToBounds = YES;
-//    self.leftButton.layer.cornerRadius  = 10;
-//    self.leftButton.width  = 50;
-//    self.leftButton.height = 50;
-//    self.leftButton.x      = self.downButton.x - self.leftButton.width;
-//    self.leftButton.y      = twoY;
-//
-//    self.rightButton = [[UIButton alloc] init];
-//    [self.rootView addSubview:self.rightButton];
-//    [self.rightButton addTarget:self action:@selector(rightClick:) forControlEvents:UIControlEventTouchUpInside];
-//    [self.rightButton setTitle:@"右" forState:UIControlStateNormal];
-//    [self.rightButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-//    self.rightButton.backgroundColor = CJColor(200, 200, 200);
-//    self.rightButton.layer.masksToBounds = YES;
-//    self.rightButton.layer.cornerRadius  = 10;
-//    self.rightButton.width  = 50;
-//    self.rightButton.height = 50;
-//    self.rightButton.x      = self.downButton.right;
-//    self.rightButton.y      = twoY;
-    
     UIColor *buttonBackgroundColor = CJColorWithalpha(200, 200, 200, 1.0);
     
     
@@ -307,7 +257,7 @@ static RootViewController * instance;
     // 左
     self.leftButton = [[UIButton alloc] init];
     [self.rootView addSubview:self.leftButton];
-    [self.leftButton addTarget:self action:@selector(leftClick:) forControlEvents:UIControlEventTouchUpInside];
+//    [self.leftButton addTarget:self action:@selector(leftClick:) forControlEvents:UIControlEventTouchUpInside];
     [self.leftButton setImage:[UIImage imageWithIcon:@"fa-arrow-left" backgroundColor:[UIColor clearColor] iconColor:[UIColor blackColor] fontSize:25] forState:UIControlStateNormal];
     self.leftButton.backgroundColor = buttonBackgroundColor;
     self.leftButton.layer.masksToBounds = YES;
@@ -319,7 +269,6 @@ static RootViewController * instance;
     // 右
     self.rightButton = [[UIButton alloc] init];
     [self.rootView addSubview:self.rightButton];
-    [self.rightButton addTarget:self action:@selector(rightClick:) forControlEvents:UIControlEventTouchUpInside];
     [self.rightButton setImage:[UIImage imageWithIcon:@"fa-arrow-right" backgroundColor:[UIColor clearColor] iconColor:[UIColor blackColor] fontSize:25] forState:UIControlStateNormal];
     self.rightButton.backgroundColor = buttonBackgroundColor;
     self.rightButton.layer.masksToBounds = YES;
@@ -331,7 +280,6 @@ static RootViewController * instance;
     // 下
     self.downButton = [[UIButton alloc] init];
     [self.rootView addSubview:self.downButton];
-    [self.downButton addTarget:self action:@selector(downClick:) forControlEvents:UIControlEventTouchUpInside];
     [self.downButton setImage:[UIImage imageWithIcon:@"fa-arrow-down" backgroundColor:[UIColor clearColor] iconColor:[UIColor blackColor] fontSize:25] forState:UIControlStateNormal];
     self.downButton.backgroundColor = buttonBackgroundColor;
     self.downButton.layer.masksToBounds = YES;
@@ -403,20 +351,128 @@ static RootViewController * instance;
     longitudinalView.height = self.downButton.centerY - self.upButton.centerY;
     
     
+    
+    
+    
+    UITapGestureRecognizer *leftSingleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(leftSingleTap)];
+    leftSingleTap.delegate = self;
+    [self.leftButton addGestureRecognizer:leftSingleTap];
+    
+    UILongPressGestureRecognizer *leftLongPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(leftLongPress:)];
+    leftLongPress.minimumPressDuration = speedUpInterval;
+    leftLongPress.delegate             = self;
+    [self.leftButton addGestureRecognizer:leftLongPress];
+    [leftSingleTap requireGestureRecognizerToFail:leftLongPress];
+    
+    
+    
+    UITapGestureRecognizer *rightSingleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(rightSingleTap)];
+    rightSingleTap.delegate = self;
+    [self.rightButton addGestureRecognizer:rightSingleTap];
+    
+    UILongPressGestureRecognizer *rightLongPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(rightLongPress:)];
+    rightLongPress.minimumPressDuration = speedUpInterval;
+    rightLongPress.delegate             = self;
+    [self.rightButton addGestureRecognizer:rightLongPress];
+    [rightSingleTap requireGestureRecognizerToFail:rightLongPress];
+    
+    
+    
+    UITapGestureRecognizer *downSingleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(downSingleTap)];
+    downSingleTap.delegate = self;
+    [self.downButton addGestureRecognizer:downSingleTap];
+    
+    UILongPressGestureRecognizer *downLongPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(downLongPress:)];
+    downLongPress.minimumPressDuration = speedUpInterval;
+    downLongPress.delegate             = self;
+    [self.downButton addGestureRecognizer:downLongPress];
+    [downSingleTap requireGestureRecognizerToFail:downLongPress];
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+}
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    return YES;
 }
 
-- (void)leftClick:(UIButton *)leftButton
-{
+
+/**
+ * ⬅️单击
+ */
+- (void)leftSingleTap {
     [self.gameSqureCase squareMoveLeft];
 }
-- (void)rightClick:(UIButton *)rightButton
-{
+/**
+ * ⬅️长按
+ */
+- (void)leftLongPress:(UILongPressGestureRecognizer *)longPress {
+    /*
+     说明：长按手势的常用状态如下
+     开始：UIGestureRecognizerStateBegan
+     改变：UIGestureRecognizerStateChanged
+     结束：UIGestureRecognizerStateEnded
+     取消：UIGestureRecognizerStateCancelled
+     失败：UIGestureRecognizerStateFailed
+     */
+    if (longPress.state == UIGestureRecognizerStateBegan) {
+        [self addButtonLongPressTimer:@selector(leftSingleTap)];
+    }
+    else if (longPress.state == UIGestureRecognizerStateEnded) {
+        [self removeButtonLongPressTimer];
+    }
+}
+
+
+
+/**
+ * ➡️单击
+ */
+- (void)rightSingleTap {
     [self.gameSqureCase squareMoveRight];
 }
-- (void)downClick:(UIButton *)downButton
-{
+/**
+ * ➡️长按
+ */
+- (void)rightLongPress:(UILongPressGestureRecognizer *)longPress {
+    if (longPress.state == UIGestureRecognizerStateBegan) {
+        [self addButtonLongPressTimer:@selector(rightSingleTap)];
+    }
+    else if (longPress.state == UIGestureRecognizerStateEnded) {
+        [self removeButtonLongPressTimer];
+    }
+}
+
+
+
+/**
+ * ⬇️单击
+ */
+- (void)downSingleTap {
     [self.gameSqureCase squareMoveDown];
 }
+/**
+ * ⬇️长按
+ */
+- (void)downLongPress:(UILongPressGestureRecognizer *)longPress {
+    if (longPress.state == UIGestureRecognizerStateBegan) {
+        [self addButtonLongPressTimer:@selector(downSingleTap)];
+    }
+    else if (longPress.state == UIGestureRecognizerStateEnded) {
+        [self removeButtonLongPressTimer];
+    }
+}
+
+
+
+
 - (void)rotateClick:(UIButton *)rotateButton
 {
     [self.gameSqureCase squareRound];
@@ -435,6 +491,7 @@ static RootViewController * instance;
     if (playPausebutton.selected == YES) {// 暂停
         [self.tetrisTimer setFireDate:[NSDate distantFuture]];
         [self setOperationButtonUserInteractionEnabled:NO];
+        [self removeButtonLongPressTimer];
     }
     else {// 开始
         [self.tetrisTimer setFireDate:[NSDate date]];
@@ -451,6 +508,25 @@ static RootViewController * instance;
     self.downStraightButton.userInteractionEnabled = userInteractionEnabled;
 }
 
+
+
+- (void)addButtonLongPressTimer:(SEL)selector
+{
+    if (!self.buttonLongPressTimer) {
+        self.buttonLongPressTimer = [NSTimer timerWithTimeInterval:speedUpInterval
+                                                            target:self
+                                                          selector:selector
+                                                          userInfo:nil
+                                                           repeats:YES];
+        NSRunLoop *looper = [NSRunLoop mainRunLoop] ;
+        [looper addTimer:self.buttonLongPressTimer forMode:NSRunLoopCommonModes];
+    }
+}
+- (void)removeButtonLongPressTimer
+{
+    [self.buttonLongPressTimer invalidate];
+    self.buttonLongPressTimer = nil;
+}
 #pragma mark ================================================= 创建 - 游戏视图 =================================================
 #pragma mark ================================================= 创建 - 游戏视图 =================================================
 #pragma mark ================================================= 创建 - 游戏视图 =================================================
